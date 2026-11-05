@@ -71,6 +71,12 @@ NSString *__iCloudsDriveDocumentsPath = nil;
 
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *path = [fm containerURLForSecurityApplicationGroupIdentifier:groupID].path;
+    if (path == nil) {
+      // Sideloaded builds (SideStore/free Apple ID) may lack the app group;
+      // fall back to a private folder in the app's own container.
+      path = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/BlinkGroupFallback"];
+      [fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+    }
     __groupContainerPath = path;
   }
   return __groupContainerPath;
