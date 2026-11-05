@@ -65,6 +65,9 @@ class MigrationFileProviderReplicatedExtension: MigrationStep {
   }
 
   private func deleteFileProviderStorage() {
+    // Sideloaded builds without the File Provider extension have no storage to clean,
+    // and documentStorageURL raises an exception there.
+    guard _NSFileProviderManager.isExtensionBundled else { return }
     // Clean up the old File Provider path
     let fileProviderURL = NSFileProviderManager.default.documentStorageURL
 

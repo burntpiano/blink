@@ -232,7 +232,17 @@ class FileProviderDomain: Identifiable, Codable, Equatable {
 }
 
 extension _NSFileProviderManager {
+  /// False on sideloaded builds that ship without the File Provider extension;
+  /// NSFileProviderManager APIs raise Objective-C exceptions in that case.
+  @objc static var isExtensionBundled: Bool {
+    guard let plugins = Bundle.main.builtInPlugInsURL,
+          let items = try? FileManager.default.contentsOfDirectory(atPath: plugins.path)
+    else { return false }
+    return items.contains { $0.hasSuffix(".appex") }
+  }
+
   @objc static func syncWithBKHosts() {
+    guard isExtensionBundled else { return }
     getDomainsWithCompletionHandler { nsDomains, err in
       guard err == nil else {
         print("get domains error", err!)
